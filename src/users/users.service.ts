@@ -1,47 +1,48 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-
-export interface User {
-  name: string;
-  email: string;
-  id: number;
-}
-
-const USER_DATA: User[] = [];
+import prisma from '../db';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
-  getUsers(): User[] {
-    return USER_DATA;
+  async getUsers(): Promise<User[]> {
+    return await prisma.user.findMany();
   }
 
-  createUser(user: User): User {
-    const newUser = { ...user, id: USER_DATA.length + 1 };
-    USER_DATA.push(newUser);
-    return newUser;
+  async createUser(
+    userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<User> {
+    return await prisma.user.create({
+      data: {
+        name: userData.name,
+        email: userData.email,
+      },
+    });
   }
 
-  getUser(id: number): User | undefined {
-    return USER_DATA.find((user) => user.id === id);
+  async getUser(id: string): Promise<User | null> {
+    return await prisma.user.findUnique({
+      where: { id },
+    });
   }
 
-  updateUser(id: number, user: User): User {
-    const index = USER_DATA.findIndex((u) => u.id === id);
-    if (index === -1) {
+  async updateUser(
+    id: string,
+    userData: Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt'>>,
+  ): Promise<User> {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
-    USER_DATA[index] = {
-      ...USER_DATA[index],
-      id: user.id,
-      name: user.name,
-      email: user.email,
-    };
-    return USER_DATA[index];
+
+    return await prisma.user.update({
+      where: { id },
+      data: userData,
+    });
   }
 
-  deleteUser(id: number): void {
-    const index = USER_DATA.findIndex((user) => user.id === id);
-    if (index !== -1) {
-      USER_DATA.splice(index, 1);
-    }
+  async deleteUser(id: string): Promise<void> {
+    await prisma.user.delete({
+      where: { id },
+    });
   }
 }

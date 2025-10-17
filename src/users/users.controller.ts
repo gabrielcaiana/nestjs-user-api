@@ -7,34 +7,40 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { UsersService, type User } from './users.service';
+import { UsersService } from './users.service';
+import { User } from '@prisma/client';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  listAll(): any[] {
-    return this.usersService.getUsers();
+  async listAll(): Promise<User[]> {
+    return await this.usersService.getUsers();
   }
 
   @Post()
-  create(@Body() user: User): User {
-    return this.usersService.createUser(user);
+  async create(
+    @Body() userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<User> {
+    return await this.usersService.createUser(userData);
   }
 
   @Get(':id')
-  getByEmail(@Param('id') id: number): User | undefined {
-    return this.usersService.getUser(Number(id));
+  async getById(@Param('id') id: string): Promise<User | null> {
+    return await this.usersService.getUser(id);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() user: User): User {
-    return this.usersService.updateUser(Number(id), user);
+  async update(
+    @Param('id') id: string,
+    @Body() userData: Partial<Omit<User, 'id' | 'createdAt' | 'updatedAt'>>,
+  ): Promise<User> {
+    return await this.usersService.updateUser(id, userData);
   }
 
   @Delete(':id')
-  delete(@Param('id') id: string): void {
-    this.usersService.deleteUser(Number(id));
+  async delete(@Param('id') id: string): Promise<void> {
+    return await this.usersService.deleteUser(id);
   }
 }
