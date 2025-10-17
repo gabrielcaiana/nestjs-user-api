@@ -398,7 +398,7 @@ Este projeto está sob a licença UNLICENSED - projeto de estudos.
 Para dúvidas sobre este projeto de estudos:
 
 - **GitHub Issues:** [Link para issues](https://github.com/gabrielcaiana/api-users/issues)
-- **Email:** gabriel@email.com
+- **Email:** gabrielcaianaguedes@gmail.com
 
 ---
 
